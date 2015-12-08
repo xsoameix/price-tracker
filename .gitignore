@@ -1,0 +1,11 @@
+/_public/
+/node_modules/
+
+# configuration
+/tracker/amazon.items.json
+/tracker/amazon.json
+
+*.js
+
+# vim
+*.swp

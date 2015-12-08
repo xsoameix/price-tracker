@@ -1,0 +1,47 @@
+{
+  "name": "laptop",
+  "version": "1.0.0",
+  "description": "show status of your laptop",
+  "main": "index.js",
+  "scripts": {
+    "test":  "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack && gulp build:server",
+    "dev":   "(webpack --progress --watch) & (PORT=4000 node server/app)"
+  },
+  "author": "Lien Chiang",
+  "license": "ISC",
+  "dependencies": {
+    "d3": "^3.5.10",
+    "jquery": "^2.1.4",
+    "express": "^4.13.3",
+    "jade": "^1.11.0",
+    "request": "^2.67.0",
+    "request-promise": "^1.0.2",
+    "bluebird": "^3.0.6",
+    "continuation-local-storage": "^3.1.4",
+    "cheerio": "^0.19.0",
+    "money": "^0.2.0",
+    "gaussian": "^1.0.0",
+    "moment": "^2.10.6"
+  },
+  "devDependencies": {
+    "babel-core": "^6.2.1",
+    "babel-loader": "^6.2.0",
+    "babel-preset-es2015": "^6.1.18",
+    "babel-preset-react": "^6.1.18",
+    "gulp": "^3.9.0",
+    "gulp-livescript": "^2.4.0",
+    "gulp-util": "^3.0.7",
+    "jsx-loader": "^0.13.2",
+    "livescript": "^1.4.0",
+    "livescript-loader": "^0.1.5",
+    "react": "^0.14.3",
+    "react-dom": "^0.14.3",
+    "react-hot-loader": "^1.3.0",
+    "style-loader": "^0.13.0",
+    "css-loader": "^0.23.0",
+    "stylus-loader": "^1.4.2",
+    "webpack": "^1.12.9",
+    "webpack-dev-server": "^1.14.0"
+  }
+}
