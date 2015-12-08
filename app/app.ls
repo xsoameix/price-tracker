@@ -46,7 +46,7 @@ Main = React.createFactory React.createClass do
         ]
         format = d3.time.format.iso
         data = price['B0090UEQ8I'].map ->
-          price: it.new
+          price: it.amazon
           date: format.parse it.created_time
         console.log data
         elem = ReactDOM.findDOMNode @

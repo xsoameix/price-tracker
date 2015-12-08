@@ -8,8 +8,8 @@ get-price = (itemid) ->
   request "http://www.amazon.com/gp/product/#itemid"
   .then ->
     $ = cheerio.load it
+    price = amazon: money $('#priceblock_ourprice').text! .convert!
     span = $('#olp_feature_div > div > span')
-    price = {}
     span.each ->
       cond = url.parse($(@).find('a').attr('href'), true).query.condition
       price[cond] = money $(@).find('span').text! .convert!
