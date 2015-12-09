@@ -7,12 +7,14 @@ export webserver = (app = express!) ->
   app.set 'view engine', 'jade'
   app.get '/', (req, res) ->
     res.render 'index'
+  app.get '/item', (req, res) ->
+    fs.read-file-async 'tracker/amazon.items.json', 'utf8'
+    .then ->  res.json JSON.parse it
+    .catch -> res.status \403 .send 'err'
   app.get '/price', (req, res) ->
     fs.read-file-async 'tracker/amazon.json', 'utf8'
-    .then ->
-      res.json JSON.parse it
-    .catch ->
-      res.status \403 .send 'err'
+    .then ->  res.json JSON.parse it
+    .catch -> res.status \403 .send 'err'
   app.use '/assets/js',  express.static \_public/js
 
 export run-server = ->
