@@ -35,23 +35,27 @@ Main = React.createFactory React.createClass do
       [".%L"   (d) -> d.getMilliseconds!]
       [":%S"   (d) -> d.getSeconds!]
       ["%I:%M" (d) -> d.getMinutes!]
-      ["%I %p" (d) -> d.getHours! ]
+      ["%p %I" (d) -> d.getHours! ]
       ["%a %d" (d) -> d.getDay! && d.getDate! != 1 ]
       ["%b %d" (d) -> d.getDate! != 1 ]
       ["%B"    (d) -> d.getMonth! ]
       ["%Y"    (d) -> true ]
     ]
     format = d3.time.format.iso
+    currency = d3.format ',.2f'
+    bisect = d3.bisector (.date) .left
     data = price[choose.id].map ->
       price: it.amazon
       date: format.parse it.created_time
-    margin = top: 40 right: 20 bottom: 30 left: 80
+    margin = top: 40 right: 80 bottom: 30 left: 80
     width = 960 - margin.left - margin.right
     height = 500 - margin.top - margin.bottom
     x = d3.time.scale! .range [0, width]  .domain d3.extent data, (.date)
     y = d3.scale.linear!range [height, 0] .domain d3.extent data, (.price)
     x-axis = d3.svg.axis!scale x .orient 'bottom' .tick-format time-format
-    y-axis = d3.svg.axis!scale y .orient 'left'
+    y-axis = d3.svg.axis!scale y .orient 'left' .tick-size -width
+      .tick-padding 8
+      .tick-format -> "$ #{currency it}"
     line = d3.svg.line!
     .x -> x it.date
     .y -> y it.price
@@ -75,11 +79,54 @@ Main = React.createFactory React.createClass do
     .call y-axis
     .append 'text'
     .text '價格(美元)'
+    .attr 'y', -10
     svg
     .append 'path'
     .datum data
     .attr 'class', 'line'
     .attr 'd', line
+    svg
+    .append 'path'
+    .attr 'class', 'mouse-line'
+    .style 'opacity', 0
+    focus = svg
+    .append 'g'
+    .attr 'class', 'focus'
+    .style 'display', 'none'
+    focus
+    .append 'circle'
+    .attr 'r', 4.5
+    focus
+    .append 'text'
+    .attr 'x', 9
+    .attr 'dy', '-.35em'
+    svg
+    .append 'rect'
+    .attr 'width', width
+    .attr 'height', height
+    .attr 'fill', 'none'
+    .attr 'pointer-events', 'all'
+    .on 'mouseover' ->
+      d3.select '.mouse-line'
+      .style 'opacity', '1'
+      focus.style 'display', null
+    .on 'mouseout' ->
+      d3.select '.mouse-line'
+      .style 'opacity', '0'
+      focus.style 'display', 'none'
+    .on 'mousemove' ->
+      d3.select '.mouse-line'
+      .attr 'd' ->
+        [y0, y1] = y.range!
+        x0 = d3.mouse @ .0
+        date = x.invert x0
+        i = bisect data, date, 1
+        prev = data[i - 1]
+        next = data[i]
+        item = if date - prev.date < next.date - date then prev else next
+        focus.attr 'transform', "translate(#{x item.date},#{y item.price})"
+        focus.select 'text' .text "$ #{currency item.price}"
+        "M#{x0},#{y0}L#{x0},#{y1}"
   componentDidMount: ->
     var item
     Promise.resolve $.get '/item'
