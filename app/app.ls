@@ -44,14 +44,17 @@ Main = React.createFactory React.createClass do
     format = d3.time.format.iso
     currency = d3.format ',.2f'
     bisect = d3.bisector (.date) .left
-    data = price[choose.id].map ->
-      price: it.amazon
-      date: format.parse it.created_time
+    data = <[amazon new]>.map (type) ->
+      price.filter(-> it.name == choose.name).map ->
+        price: it[type]
+        date: format.parse it.recorded_time
+      .filter (.price)
     margin = top: 40 right: 80 bottom: 30 left: 80
     width = 960 - margin.left - margin.right
     height = 500 - margin.top - margin.bottom
-    x = d3.time.scale! .range [0, width]  .domain d3.extent data, (.date)
-    y = d3.scale.linear!range [height, 0] .domain d3.extent data, (.price)
+    data-y = data.0 ++ data.1
+    x = d3.time.scale! .range [0, width]  .domain d3.extent data.0, (.date)
+    y = d3.scale.linear!range [height, 0] .domain d3.extent data-y, (.price)
     x-axis = d3.svg.axis!scale x .orient 'bottom' .tick-format time-format
     y-axis = d3.svg.axis!scale y .orient 'left' .tick-size -width
       .tick-padding 8
@@ -82,24 +85,31 @@ Main = React.createFactory React.createClass do
     .attr 'y', -10
     svg
     .append 'path'
-    .datum data
+    .datum data.1
+    .attr 'class', 'green line'
+    .attr 'd', line
+    svg
+    .append 'path'
+    .datum data.0
     .attr 'class', 'line'
     .attr 'd', line
     svg
     .append 'path'
     .attr 'class', 'mouse-line'
     .style 'opacity', 0
-    focus = svg
-    .append 'g'
-    .attr 'class', 'focus'
-    .style 'display', 'none'
-    focus
-    .append 'circle'
-    .attr 'r', 4.5
-    focus
-    .append 'text'
-    .attr 'x', 9
-    .attr 'dy', '-.35em'
+    focus = data.map ->
+      tip = svg
+      .append 'g'
+      .attr 'class', 'focus'
+      .style 'display', 'none'
+      tip
+      .append 'circle'
+      .attr 'r', 4.5
+      tip
+      .append 'text'
+      .attr 'x', 9
+      .attr 'dy', '-.35em'
+      tip
     svg
     .append 'rect'
     .attr 'width', width
@@ -109,23 +119,24 @@ Main = React.createFactory React.createClass do
     .on 'mouseover' ->
       d3.select '.mouse-line'
       .style 'opacity', '1'
-      focus.style 'display', null
+      focus.for-each -> it.style 'display', null
     .on 'mouseout' ->
       d3.select '.mouse-line'
       .style 'opacity', '0'
-      focus.style 'display', 'none'
+      focus.for-each -> it.style 'display', 'none'
     .on 'mousemove' ->
       d3.select '.mouse-line'
       .attr 'd' ->
         [y0, y1] = y.range!
         x0 = d3.mouse @ .0
         date = x.invert x0
-        i = bisect data, date, 1
-        prev = data[i - 1]
-        next = data[i]
-        item = if date - prev.date < next.date - date then prev else next
-        focus.attr 'transform', "translate(#{x item.date},#{y item.price})"
-        focus.select 'text' .text "$ #{currency item.price}"
+        data.for-each (path, i) ->
+          index = bisect path, date, 1
+          prev = path[index - 1]
+          next = path[index]
+          item = if date - prev.date < next.date - date then prev else next
+          focus[i].attr 'transform', "translate(#{x item.date},#{y item.price})"
+          focus[i].select 'text' .text "$ #{currency item.price}"
         "M#{x0},#{y0}L#{x0},#{y1}"
   componentDidMount: ->
     var item

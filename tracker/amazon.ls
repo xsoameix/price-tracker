@@ -2,7 +2,11 @@ require! <[url cheerio money moment ./chrome-meta]>
 request = require 'request-promise'
 Promise = require 'bluebird'
 fs = Promise.promisify-all require 'fs'
-{load-item} = require './amazon.lib'
+{knex} = require '../server/knex'
+cron = require 'cron' .CronJob
+
+load-item = ->
+  knex.select 'id' 'name' .from 'items'
 
 rand-num = (max, min = 1) -> Math.floor(Math.random! * (max - min + 1)) + min
 rand-pick = -> it[Math.floor(Math.random! * it.length)]
@@ -22,12 +26,13 @@ gen-user-agent = ->
   rand-pick([firefox, chrome])!
 
 get-price = (itemid) ->
+  var price
   request do
     url: "http://www.amazon.com/gp/product/#itemid"
     headers:
       'Host': 'www.amazon.com'
       'User-Agent': gen-user-agent!
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+      'Accept': 'text/html'
   .then ->
     if it == /Sorry, we just need to make sure you\'re not a robot/
       throw Error 'Detected as a robot'
@@ -35,38 +40,55 @@ get-price = (itemid) ->
     amazon = money $('#priceblock_ourprice').text! .convert!
     if !(typeof amazon != 'undefined' && amazon@@ == Number && amazon > 0)
       throw Error "No price availble: #itemid"
-    price = {amazon}
+    price := {amazon}
     span = $('#olp_feature_div > div > span')
     span.each ->
       cond = url.parse($(@).find('a').attr('href'), true).query.condition
-      price[cond] = money $(@).find('span').text! .convert!
+      price[cond] := money $(@).find('span').text! .convert!
+    request do
+      url: "http://www.amazon.com/gp/offer-listing/#itemid/ref=olp_page_1?f_new=true"
+      headers:
+        'Host': 'www.amazon.com'
+        'User-Agent': gen-user-agent!
+        'Accept': 'text/html;q=0.9,*/*;q=0.8'
+  .then ->
+    $ = cheerio.load it
+    new-price = $('.olpOfferPrice').map ->
+      money $(@).text! .convert!
+    the-price = Math.min.apply null, new-price
+    if new-price.length > 0 && !Number.isNaN the-price
+      price.new = the-price
+    if Number.isNaN price.new
+      delete price.new
     price
 
 update-price = (itemid) ->
-  file = 'tracker/amazon.json'
-  fs.read-file-async file, 'utf8'
-  .bind {}
-  .then ->
-    @json = JSON.parse it
-    Promise.all itemid.map ->
-      get-price it
+  Promise.all itemid.map ->
+    get-price it.name
   .then (price) ->
-    itemid.for-each (id, i) ~>
-      item = @json[id] || []
-      @json[id] = item ++ price[i] <<< created_time: moment!format!
-    fs.write-file-async file, JSON.stringify @json
+    attr = recorded_time: moment!format!
+    records = itemid.map (e, i) -> {item_id: e.id} <<< price[i] <<< attr
+    knex 'amazon_price' .insert records
 
 update-record = ->
   load-item!
   .then ->
-    update-price it.map (.id)
+    update-price it
   .catch ->
     if it.name == 'RequestError'
       console.log 'The network is down.'
     else
-      console.log it.message
+      console.log it.stack
 
-update-record!
+new cron do
+  cron-time: '00 * * * * *'
+  on-tick: ->
+    request.defaults({+jar}) 'http://www.amazon.com'
+    .then ->
+      update-record!
+  start: true
+  time-zone: 'Asia/Taipei'
+.start!
 
 #request do
 #  url: 'http://webservices.amazon.com/onca/xml'

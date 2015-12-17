@@ -5,7 +5,7 @@
 /tracker/amazon.items.json
 /tracker/amazon.json
 
-*.js
+/server/**/*.js
 
 # vim
 *.swp

@@ -1,12 +1,13 @@
 {
-  "name": "laptop",
+  "name": "price-tracker",
   "version": "1.0.0",
-  "description": "show status of your laptop",
+  "description": "track current products price",
   "main": "index.js",
   "scripts": {
     "test":  "echo \"Error: no test specified\" && exit 1",
     "build": "webpack && gulp build:server",
-    "dev":   "(webpack --progress --watch) & (PORT=4000 node server/app)"
+    "dev":   "(webpack --progress --watch) & (PORT=4000 node server/app)",
+    "track": "lsc tracker/amazon"
   },
   "author": "Lien Chiang",
   "license": "ISC",
@@ -53,6 +54,7 @@
     "require-dot-file": "*",
     "run-sequence": "*",
     "yamljs": "*",
+
     "classnames": "^2.2.1",
     "babel-core": "^6.2.1",
     "babel-loader": "^6.2.0",
@@ -73,7 +75,11 @@
     "url-loader": "^0.5.7",
     "file-loader": "^0.8.5",
     "webpack": "^1.12.9",
-    "webpack-dev-server": "^1.14.0"
+    "webpack-dev-server": "^1.14.0",
+    "pg": "^4.4.3",
+    "knex": "^0.9.0",
+    "bookshelf": "^0.9.1",
+    "cron": "^1.1.0"
   },
   "devDependencies": {
   }
