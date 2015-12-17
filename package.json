@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test":  "echo \"Error: no test specified\" && exit 1",
+    "setup": "knex migrate:latest && webpack && gulp build:server",
+    "start": "(PORT=4000 node server/app) & (lsc tracker/amazon)",
     "build": "webpack && gulp build:server",
-    "dev":   "(webpack --progress --watch) & (PORT=4000 node server/app)",
-    "track": "lsc tracker/amazon"
+    "dev":   "(webpack --progress --watch) & (PORT=4000 node server/app)"
   },
   "author": "Lien Chiang",
   "license": "ISC",

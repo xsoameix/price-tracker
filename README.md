@@ -1,69 +1,37 @@
-# Getting Started
+# Price Tracker
 
-1.  [Install nvm](https://github.com/creationix/nvm#install-script) and run
+Track your favorit products' price.
 
-    ```bash
-    $ nvm install v4.2.3
-    ```
+Tested platform: [Mint](http://linuxmint.com/), [Mageia](http://www.mageia.org/), [Ubuntu](http://www.ubuntu.com/), [Fedora](https://getfedora.org/), [Debian](http://www.debian.org/), [OpenSUSE](http://www.opensuse.org/), [CentOS](http://www.centos.org/), [Arch](http://www.archlinux.org/)
 
-2.  Create database user and database.
+## Getting Started
 
-    ```bash
-    $ sudo -u postgres psql -c "CREATE USER name WITH PASSWORD 'password';"
-    $ sudo -u postgres createdb -O name database
-    ```
+1.  Install
 
-## Server
+    *   [sudo](https://www.sudo.ws/) and add yourself to *wheel* or *sudo* group. 
 
-1.  Run
+    *   [postgres](https://wiki.postgresql.org/wiki/Detailed_installation_guides) and run it.
 
-    ```bash
-    $ npm run build && npm run dev
-    ```
-
-## Tracker
-
-1.  Create `price-tracker.sh`.
-
-    ```bash
-    #!/bin/bash
-
-    export NVM_DIR="/path/to/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-    nvm use --silent v4.2.3
-    cd /path/to/price-tracker
-    PG_CONN=postgres://name:password@127.0.0.1/database npm run track
-    ```
-
-    Make it executable.
-
-    ```bash
-    $ chmod +x price-tracker.sh
-    ```
-
-### Upstart
-
-1.  Create `/etc/init/price-tracker.conf`.
-
-    ```
-    # Price Tracker - tracking price daemon
-    #
-    # Price Tracker can automatically track current price of the products.
-
-    description "Price Tracker"
-
-    start on runlevel [2345]
-    stop on runlevel [!2345]
-
-    respawn
-
-    exec /path/to/price-tracker.sh
-
-    console log
-    ```
+    *   [nvm](https://github.com/creationix/nvm#install-script).
 
 2.  Run
 
     ```bash
-    $ sudo service price-tracker start
+    $ ./install.sh
+    ```
+
+    Click this [link](http://127.0.0.1:4000/).
+
+### Command Line
+
+*   Add Product
+
+    ```bash
+    $ ./product add B01639694M 'Samsung 950 Pro 512GB'
+    ```
+
+*   Remove Product
+
+    ```bash
+    $ ./product remove B01639694M
     ```

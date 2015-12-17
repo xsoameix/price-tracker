@@ -1,0 +1,20 @@
+#!/bin/bash
+
+case $1 in
+    add)
+        insert="INSERT INTO items (name, \"desc\") VALUES ('$2', '$3');"
+        sudo -iu postgres psql -d pricedb -c "$insert"
+        ;;
+    remove)
+        select="SELECT id FROM items WHERE name = '$2';"
+        id=`sudo -iu postgres psql -d pricedb -tAc "$select"`
+        delete="DELETE FROM amazon_price WHERE item_id = '$id';"
+        sudo -iu postgres psql -d pricedb -c "$delete"
+        delete="DELETE FROM items WHERE id = $id;"
+        sudo -iu postgres psql -d pricedb -c "$delete"
+        ;;
+    *)
+        echo "Usage: $0 add PRODUCT-ID DESCRITION"
+        echo "       $0 remove PRODUCT-ID"
+        exit 1
+esac
