@@ -3,7 +3,7 @@
 # Install node
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-node="v4.2.3"
+node="v4.2.4"
 nvm install $node
 
 # Configure database
